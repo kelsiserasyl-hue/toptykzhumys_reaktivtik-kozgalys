@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="kk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Реактивті қозғалыс: зымыран ұшырылымы</title>
+<style>
+:root{--bg:#050b1f;--cd:#0d1a3a;--tx:#e6ecff;--mu:#8fa3d6;--ac:#4cc9f0;--g:#ff7b2e;--r:#3ddc84;--ln:#22366b;--no:#ff5d5d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#0a1a4a,var(--bg) 60%);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:auto;padding:14px}h1{font-size:1.45rem;margin:6px 0 2px}h2{font-size:1.05rem;margin:0 0 8px;color:var(--ac)}.t{color:var(--mu);font-size:.88rem}
+.c{background:rgba(13,26,58,.85);border:1px solid var(--ln);border-radius:14px;padding:14px;margin-bottom:12px}
+canvas{width:100%;display:block;border-radius:12px;border:1px solid var(--ln);background:#050b1f}
+button{background:var(--ac);color:#04122e;font:inherit;font-weight:700;border:0;border-radius:10px;padding:9px 16px;cursor:pointer;margin:8px 6px 0 0}button.s{background:var(--ln);color:var(--tx)}button:disabled{opacity:.45;cursor:default}
+input[type=range]{width:100%;accent-color:var(--ac)}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px;margin-top:10px}.g div{background:rgba(5,11,31,.7);border-radius:10px;padding:8px;text-align:center;font-size:.8rem;color:var(--mu)}.g b{display:block;font-size:1.15rem;color:var(--tx)}
+#st{margin-top:8px;font-weight:600;color:var(--r);min-height:1.5em}textarea{width:100%;font:inherit;color:var(--tx);background:rgba(5,11,31,.8);border:1px solid var(--ln);border-radius:10px;padding:8px;margin:2px 0 8px}
+.o{display:block;width:100%;text-align:left;font-weight:400;background:rgba(5,11,31,.7);color:var(--tx);border:1px solid var(--ln);margin:5px 0}.o.ok{border-color:var(--r);background:rgba(61,220,132,.18)}.o.no{border-color:var(--no);background:rgba(255,93,93,.18)}.e{font-size:.88rem;color:var(--mu);margin:4px 0 10px}
+</style></head><body><main>
+<h1>🚀 Реактивті қозғалыс: зымыран ұшырылымы</h1><p class="t">9-сынып · Сақталу заңдары · 9.2.3.3</p>
+<div class="c"><canvas id="cv" width="560" height="440"></canvas>
+<button id="go">🔥 Ұшыру</button><button id="ps" class="s" disabled>⏸ Тоқтату</button><button id="rs" class="s">↺ Қайта бастау</button>
+<label style="display:block;margin-top:10px">Газдың шығу жылдамдығы u: <b id="uv">400</b> м/с<input type="range" id="U" min="150" max="1000" step="10" value="400"></label>
+<div id="st">Зымыран ұшыруға дайын.</div>
+<div class="g"><div>Уақыт<b id="rt">0.0 с</b></div><div>Биіктік<b id="rh">0 м</b></div><div>Жылдамдық<b id="rv">0 м/с</b></div><div>Масса<b id="rm">100 кг</b></div><div>Тарту күші F = μu<b id="rf">0 Н</b></div><div>Салмақ mg<b id="rw">980 Н</b></div></div>
+<p class="t"><span style="color:var(--g)">━ Газ ағыны (төмен)</span> · <span style="color:var(--r)">━ Зымыран қозғалысы (жоғары)</span>. Тарту күші салмақтан үлкен болғанда ғана зымыран көтеріледі: u-ны өзгертіп көріңіз.</p></div>
+<div class="c"><h2>Физикалық түсініктеме</h2><p>Зымыран жанғыш газды бір бағытта (төмен) үлкен жылдамдықпен шығарады. Газ бен зымыран өзара әсерлеседі, сондықтан зымыран қарама-қарсы бағытта (жоғары) қозғалады. Мұны <b>импульстің сақталу заңы</b> түсіндіреді: бастапқыда жүйенің импульсі нөлге тең, сондықтан m<sub>газ</sub>·v<sub>газ</sub> = m<sub>зымыран</sub>·v<sub>зымыран</sub> (модульдері бойынша). Газ неғұрлым жылдам және көп шықса, зымыран соғұрлым үлкен жылдамдыққа жетеді.</p></div>
+<div class="c"><h2>Оқушы тапсырмалары</h2>
+<p class="t">1. Зымыран неге жоғары қарай қозғалады?</p><textarea rows="2"></textarea>
+<p class="t">2. Газ қай бағытта шығады?</p><textarea rows="1"></textarea>
+<p class="t">3. Техникадағы реактивті қозғалыстың екі мысалын ата.</p><textarea rows="1"></textarea>
+<p class="t">4. Қозғалыстың негізінде жатқан физикалық заңды ата.</p><textarea rows="1"></textarea></div>
+<div class="c"><h2>Тест (4 сұрақ)</h2><div id="q"></div><b id="sc"></b></div>
+<script>
+const $=s=>document.querySelector(s),cv=$("#cv"),x=cv.getContext("2d"),W=560,H=440,G=9.8,M0=100,FU=50,MU=5;
+let S,run,pause,PA=[],stars=[];
+for(let i=0;i<130;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,d:Math.random()*.9+.1,p:Math.random()*6});
+function rs(){S={t:0,h:0,v:0,f:FU,on:0,msg:"Зымыран ұшыруға дайын.",end:0};run=pause=0;PA=[];$("#go").disabled=0;$("#ps").disabled=1;$("#ps").textContent="⏸ Тоқтату";upd()}
+const u=()=>+$("#U").value;
+function upd(){const m=M0-FU+S.f;$("#uv").textContent=u();$("#rt").textContent=S.t.toFixed(1)+" с";$("#rh").textContent=Math.max(0,S.h).toFixed(0)+" м";$("#rv").textContent=S.v.toFixed(0)+" м/с";$("#rm").textContent=m.toFixed(0)+" кг";$("#rf").textContent=(S.on?MU*u():0).toFixed(0)+" Н";$("#rw").textContent=(m*G).toFixed(0)+" Н";$("#st").textContent=S.msg}
+$("#go").onclick=()=>{if(run)return;run=1;S.on=1;$("#go").disabled=1;$("#ps").disabled=0};
+$("#ps").onclick=()=>{pause=!pause;$("#ps").textContent=pause?"▶ Жалғастыру":"⏸ Тоқтату"};
+$("#rs").onclick=rs;$("#U").oninput=upd;
+function phys(dt){if(!run||pause||S.end)return;const m=M0-FU+S.f;let a=-G;
+if(S.on&&S.f>0){const F=MU*u();a=F/m-G;if(S.h<=0&&a<=0){S.v=0;a=0;S.msg="Тарту күші F салмақтан аз: зымыран көтерілмейді. u-ны арттырыңыз!"}else S.msg=a>0&&S.h>=0?"Қозғалтқыш жұмыс істеп тұр: газ төмен, зымыран жоғары.":S.msg;S.f=Math.max(0,S.f-MU*dt);if(S.f<=0){S.on=0;S.msg="Отын таусылды. Зымыран инерциямен қозғалады."}}
+else if(S.h<=0&&S.v<=0){a=0;S.v=0}
+S.v+=a*dt;S.h+=S.v*dt;S.t+=dt;if(S.h<=0&&S.v<0&&S.t>1){S.h=0;S.v=0;S.end=1;S.msg="Зымыран жерге оралды. «Қайта бастау» батырмасын басыңыз."}
+if(S.h<0)S.h=0;upd()}
+function arrow(x1,y1,x2,y2,c,l,tx){x.strokeStyle=x.fillStyle=c;x.lineWidth=4;x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();const a=Math.atan2(y2-y1,x2-x1);x.beginPath();x.moveTo(x2,y2);x.lineTo(x2-12*Math.cos(a-.4),y2-12*Math.sin(a-.4));x.lineTo(x2-12*Math.cos(a+.4),y2-12*Math.sin(a+.4));x.fill();x.font="12px system-ui";x.textAlign="left";x.fillText(l,tx,(y1+y2)/2)}
+function draw(t){x.clearRect(0,0,W,H);const gy=340+S.h*.05;
+for(const s of stars){if(run&&!pause)s.y+=S.v*s.d*.004;if(s.y>H)s.y-=H;x.globalAlpha=.5+.5*Math.sin(t/500+s.p);x.fillStyle="#fff";x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()}x.globalAlpha=1;
+if(gy<H+900){const g=x.createRadialGradient(280,gy+900,880,280,gy+900,930);g.addColorStop(0,"rgba(76,201,240,.5)");g.addColorStop(1,"rgba(76,201,240,0)");x.fillStyle=g;x.beginPath();x.arc(280,gy+900,930,0,7);x.fill();
+x.fillStyle="#1d5fa8";x.beginPath();x.arc(280,gy+900,900,0,7);x.fill();x.fillStyle="#2e8b57";x.beginPath();x.ellipse(220,gy+20,90,8,0,0,7);x.ellipse(380,gy+30,70,6,0,0,7);x.fill();
+if(S.h<60){x.fillStyle="#555";x.fillRect(240,gy-6,80,8);x.fillRect(222,gy-60,6,60)}}
+const thr=S.on&&S.f>0&&run&&!(S.h<=0&&MU*u()<=(M0-FU+S.f)*G),sh=thr?Math.sin(t/30)*1.5:0,rx=280+sh,ry=250;
+if(thr&&!pause)for(let i=0;i<4;i++)PA.push({x:rx+(Math.random()-.5)*12,y:ry+72,vy:u()*.012+3+Math.random()*2,vx:(Math.random()-.5)*1.4,l:1});
+PA=PA.filter(p=>p.l>0);for(const p of PA){if(!pause){p.y+=p.vy+S.v*.004;p.x+=p.vx;p.l-=.022}x.globalAlpha=Math.max(0,p.l);x.fillStyle=p.l>.6?"#ffe27a":"#ff7b2e";x.beginPath();x.arc(p.x,p.y,5*p.l+1.5,0,7);x.fill()}x.globalAlpha=1;
+x.fillStyle="#e8ecf5";x.beginPath();x.moveTo(rx,ry-70);x.quadraticCurveTo(rx+24,ry-30,rx+20,ry+50);x.lineTo(rx-20,ry+50);x.quadraticCurveTo(rx-24,ry-30,rx,ry-70);x.fill();
+x.fillStyle="#e63946";x.beginPath();x.moveTo(rx,ry-70);x.quadraticCurveTo(rx+14,ry-52,rx+17,ry-42);x.lineTo(rx-17,ry-42);x.quadraticCurveTo(rx-14,ry-52,rx,ry-70);x.fill();
+x.fillStyle="#4cc9f0";x.beginPath();x.arc(rx,ry-12,9,0,7);x.fill();x.fillStyle="#e63946";x.beginPath();x.moveTo(rx-20,ry+20);x.lineTo(rx-40,ry+58);x.lineTo(rx-20,ry+50);x.moveTo(rx+20,ry+20);x.lineTo(rx+40,ry+58);x.lineTo(rx+20,ry+50);x.fill();x.fillStyle="#555";x.fillRect(rx-12,ry+50,24,10);
+if(thr){const L=Math.min(110,30+u()*.09);arrow(rx+60,ry+60,rx+60,ry+60+L,"#ff7b2e","Газ",rx+68);arrow(rx+60,ry-10,rx+60,ry-10-Math.min(120,20+MU*u()/(M0-FU+S.f)*3),"#3ddc84","Зымыран",rx+68)}}
+rs();let last=performance.now();(function l(n){phys(Math.min(.05,(n-last)/1000));last=n;draw(n);requestAnimationFrame(l)})(last);
+// test
+const Q=[["Зымыран неге жоғары қарай қозғалады?","Газ төмен шығады, импульстің сақталуы бойынша зымыран қарама-қарсы бағытта қозғалады",["Ол ауаны итереді","Жер оны жоғары тартады","Күн сәулесі оны итереді"],"Зымыран мен газ өзара әсерлеседі: газ төмен, зымыран жоғары қозғалады. Ауа қажет емес, зымыран ғарышта да ұшады."],
+["Газ қай бағытта шығады?","Зымыран қозғалысына қарама-қарсы, төмен",["Жоғары","Зымыраннан оңға","Газ шықпайды"],"Газ зымыранға қарама-қарсы бағытта шығады, сондықтан симуляцияда оның көрсеткісі төмен бағытталған."],
+["Қайсысы реактивті қозғалысқа мысал?","Кальмардың су шығарып жүзуі",["Велосипедтің жүруі","Желкенді қайықтың жүзуі","Арбаның итерілуі"],"Кальмар суды итеріп шығарады және қарама-қарсы бағытқа қозғалады. Зымыран, реактивті ұшақ та осылай жұмыс істейді."],
+["Реактивті қозғалыстың негізінде қандай заң жатыр?","Импульстің сақталу заңы",["Бүкіл дүниежүзілік тартылыс заңы","Гук заңы","Архимед заңы"],"Тұйық жүйенің толық импульсі сақталады: газ бір бағытқа импульс алса, зымыран сондай импульсті қарама-қарсы бағытқа алады."]];
+let pts=0,ans=0;Q.forEach(([q,r,w,e],k)=>{const d=document.createElement("div");d.innerHTML="<b>"+(k+1)+". "+q+"</b>";let dn=0;const ex=document.createElement("div");ex.className="e";
+[r,...w].sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement("button");b.className="o";b.textContent=o;b.onclick=()=>{if(dn)return;dn=1;ans++;const ok=o==r;pts+=ok;d.querySelectorAll(".o").forEach(q=>q.classList.add(q.textContent==r?"ok":q==b?"no":"x"));ex.textContent=(ok?"✅ Дұрыс! ":"❌ Қате. ")+e;$("#sc").textContent="Ұпай: "+pts+" / 4"+(ans==4?(pts==4?" 🏆 Өте жақсы!":pts>=3?" 👍 Жақсы":" Қайталап көріңіз"):"")};d.append(b)});d.append(ex);$("#q").append(d)});
+</script></main></body></html>
